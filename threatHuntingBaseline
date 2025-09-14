@@ -1,0 +1,72 @@
+function Get-Baseline {
+	param(
+		[string]$outfile = "baseline.txt"
+	)
+	if (Test-Path $outfile -pathtype Leaf){
+		Write-Host "The file $outfile exists, appending to it" 
+	}
+	else{
+		New-Item -Path $outfile -ItemType File
+		Write-Host "File created"
+	}
+
+	"whoami:" | Out-File -Filepath $outfile -Append
+	whoami >> $outfile
+	"`nwhoami /priv:" | Out-File -Filepath $outfile -Append
+	whoami /priv >> $outfile
+	"`nhostname:" | Out-File -Filepath $outfile -Append
+	hostname >> $outfile
+	"`nnetstat -a:" | Out-File -Filepath $outfile -Append
+	netstat -a >> $outfile
+	"`nnetstat -s:" | Out-File -Filepath $outfile -Append
+	netstat -s >> $outfile
+	"`nListening Executable Full Paths:" | Out-File -Filepath $outfile -Append
+	(Get-Process -Id (Get-NetTCPConnection -State Listen).OwningProcess | Select-Object Id, ProcessName, Path,@{Name="LocalAddress";Expression={(Get-NetTCPConnection -OwningProcess $_.Id -State Listen).LocalAddress}},@{Name="LocalPort";Expression={(Get-NetTCPConnection -OwningProcess $_.Id -State Listen).LocalPort}}) >> $outfile
+  # this command did come from the chrome AI overview, it apparently doesn't list its sources anymore and I poked through a few different articles and forums and couldn't find a source, but it works (I don't like this)(if there's not an identifiable source it shouldn't work)
+	"`nGet-Process:" | Out-File -Filepath $outfile -Append
+	Get-Process >> $outfile
+	"`nRunning Processes and Full Paths:" | Out-File -Filepath $outfile -Append
+	Get-Process | Select-Object ID, ProcessName, Path >> $outpath
+	"`nProcess Owners:" | Out-File -Filepath $outfile -Append
+	Get-Process -IncludeUserName >> $outfile
+	"`nLoaded Modules w/ Running Processes:" | Out-File -Filepath $outfile -Append
+	get-process -module >> $outfile
+	"`nServices with Running Processes:" | Out-File -Filepath $outfile -Append
+	tasklist /svc >> $outfile
+	"`nPassword Policies:" | Out-File -Filepath $outfile -Append
+	net accounts >> $outfile
+	"`nLocal Users:" | Out-File -Filepath $outfile -Append
+	Get-LocalUser >> $outfile
+	"`nLocal Groups:" | Out-File -Filepath $outfile -Append
+	Get-LocalGroup >> $outfile
+	"`nUsers in Each Local Group:" | Out-File -Filepath $outfile -Append
+	foreach ($group in Get-LocalGroup) {
+ 		[PSCustomObject]@{
+    			Group = $group.Name
+   			User  = (Get-LocalGroupMember -Group $group.Name).Name -join '; '
+ 			} >> $outfile
+		} 
+		# source: https://www.reddit.com/r/PowerShell/comments/i2k4vd/list_local_groups_and_the_associated_members_of/
+	"`nRegistered Services:" | Out-File -Filepath $outfile -Append
+	Get-Service >> $outfile
+	"`nRunning Services:" | Out-File -Filepath $outfile -Append
+	Get-Service | Where-Object {$_.Status -eq "Running"} >> $outfile
+	"`nStopped Services:" | Out-File -Filepath $outfile -Append
+	Get-Service | Where-Object {$_.Status -eq "Stopped"} >> $outfile
+	"`nRegistered Services Full Paths:" | Out-File -Filepath $outfile -Append
+	Get-WmiObject Win32_Service | Select-Object Name, Pathname >> $outfile
+	"`nProgram Files Directory Contents Permissions:" | Out-File -Filepath $outfile -Append
+	Get-ACL "C:\Program Files\*" >> $outfile
+	"`nUsers\Public Permissions:" | Out-File -Filepath $outfile -Append
+	Get-ACL "C:\Users\Public" >> $outfile
+	"`nProgramData Permissions:" | Out-File -Filepath $outfile -Append
+	Get-ACL "C:\ProgramData" >> $outfile
+	"`nScheduled Tasks:" | Out-File -Filepath $outfile -Append
+	Get-ScheduledTask >> $outfile
+	"`nComputer Info:" | Out-File -Filepath $outfile -Append
+	Get-ComputerInfo >> $outfile
+	"`nTree:" | Out-File -Filepath $outfile -Append
+	tree >> $outfile
+}
+
+Get-Baseline
