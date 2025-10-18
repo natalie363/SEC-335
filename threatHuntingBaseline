@@ -10,26 +10,26 @@ function Get-Baseline {
 		Write-Host "Folder created"
 	}
 
-	whoami | Export-Csv -NoTypeInformation -Path .\$outfolder\whoami.csv
-	whoami /priv | Export-Csv -NoTypeInformation -Path .\$outfolder\whoamiPriv.csv
-	hostname | Export-Csv -NoTypeInformation -Path .\$outfolder\hostname.csv
-	netstat -a | Export-Csv -NoTypeInformation -Path .\$outfolder\netstatA.csv
-	netstat -s | Export-Csv -NoTypeInformation -Path .\$outfolder\netstatS.csv
+	whoami | Select-Object @{Name='Name';Expression={$_}} | Export-Csv -NoTypeInformation -Path .\$outfolder\whoami.csv
+	whoami /priv | Select-Object @{Name='Name';Expression={$_}} | Export-Csv -NoTypeInformation -Path .\$outfolder\whoamiPriv.csv
+	hostname | Select-Object @{Name='Name';Expression={$_}} | Export-Csv -NoTypeInformation -Path .\$outfolder\hostname.csv
+	netstat -a | Select-Object @{Name='Name';Expression={$_}} | Export-Csv -NoTypeInformation -Path .\$outfolder\netstatA.csv
+	netstat -s | Select-Object @{Name='Name';Expression={$_}} | Export-Csv -NoTypeInformation -Path .\$outfolder\netstatS.csv
 	(Get-Process -Id (Get-NetTCPConnection -State Listen).OwningProcess | Select-Object Id, ProcessName, Path,@{Name="LocalAddress";Expression={(Get-NetTCPConnection -OwningProcess $_.Id -State Listen).LocalAddress}},@{Name="LocalPort";Expression={(Get-NetTCPConnection -OwningProcess $_.Id -State Listen).LocalPort}}) | Export-Csv -NoTypeInformation -Path .\$outfolder\nettcpconnections.csv
   # this command did come from the chrome AI overview, it apparently doesn't list its sources anymore and I poked through a few different articles and forums and couldn't find a source, but it works (I don't like this)(if there's not an identifiable source it shouldn't work)
 	Get-Process | Export-Csv -NoTypeInformation -Path .\$outfolder\getprocess.csv
 	Get-Process | Select-Object ID, ProcessName, Path | Export-Csv -NoTypeInformation -Path .\$outfolder\getProcessOrganized.csv
 	Get-Process -IncludeUserName | Export-Csv -NoTypeInformation -Path .\$outfolder\processUsername.csv
 	get-process -module | Export-Csv -NoTypeInformation -Path .\$outfolder\processModule.csv
-	tasklist /svc | Export-Csv -NoTypeInformation -Path .\$outfolder\svcTasklist.csv
-	net accounts | Export-Csv -NoTypeInformation -Path .\$outfolder\netAccounts.csv
+	tasklist /svc | Select-Object @{Name='Name';Expression={$_}} | Export-Csv -NoTypeInformation -Path .\$outfolder\svcTasklist.csv
+	net accounts | Select-Object @{Name='Name';Expression={$_}} | Export-Csv -NoTypeInformation -Path .\$outfolder\netAccounts.csv
 	Get-LocalUser | Export-Csv -NoTypeInformation -Path .\$outfolder\localUser.csv
 	Get-LocalGroup | Export-Csv -NoTypeInformation -Path .\$outfolder\localGroups.csv
 	foreach ($group in Get-LocalGroup) {
  		[PSCustomObject]@{
     			Group = $group.Name
    			User  = (Get-LocalGroupMember -Group $group.Name).Name -join '; '
- 			} | Export-Csv -NoTypeInformation -Path .\$outfolder\localGroupDetails.csv
+ 			} | Export-Csv -NoTypeInformation -Append -Path .\$outfolder\localGroupDetails.csv
 		} 
 		# source: https://www.reddit.com/r/PowerShell/comments/i2k4vd/list_local_groups_and_the_associated_members_of/
 	Get-Service | Export-Csv -NoTypeInformation -Path .\$outfolder\getAllServices.csv
@@ -41,7 +41,7 @@ function Get-Baseline {
 	Get-ACL "C:\ProgramData" | Export-Csv -NoTypeInformation -Path .\$outfolder\programDataACL.csv
 	Get-ScheduledTask | Export-Csv -NoTypeInformation -Path .\$outfolder\scheduledTasks.csv
 	Get-ComputerInfo | Export-Csv -NoTypeInformation -Path .\$outfolder\computerInfo.csv
-	tree | Export-Csv -NoTypeInformation -Path .\$outfolder\tree.csv
+	tree  C:\ >> .\$outfolder\tree.txt
 }
 
 Get-Baseline
