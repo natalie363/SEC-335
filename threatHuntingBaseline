@@ -19,7 +19,7 @@ function Get-Baseline {
   # this command did come from the chrome AI overview, it apparently doesn't list its sources anymore and I poked through a few different articles and forums and couldn't find a source, but it works (I don't like this)(if there's not an identifiable source it shouldn't work)
 	Get-Process | Export-Csv -NoTypeInformation -Path .\$outfolder\getprocess.csv
 	Get-Process | Select-Object ID, ProcessName, Path | Export-Csv -NoTypeInformation -Path .\$outfolder\getProcessOrganized.csv
-	Get-Process -IncludeUserName | Export-Csv -NoTypeInformation -Path .\$outfolder\process&Username.csv
+	Get-Process -IncludeUserName | Export-Csv -NoTypeInformation -Path .\$outfolder\processUsername.csv
 	get-process -module | Export-Csv -NoTypeInformation -Path .\$outfolder\processModule.csv
 	tasklist /svc | Export-Csv -NoTypeInformation -Path .\$outfolder\svcTasklist.csv
 	net accounts | Export-Csv -NoTypeInformation -Path .\$outfolder\netAccounts.csv
