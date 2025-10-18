@@ -42,6 +42,7 @@ function Get-Baseline {
 	Get-ScheduledTask | Export-Csv -NoTypeInformation -Path .\$outfolder\scheduledTasks.csv
 	Get-ComputerInfo | Export-Csv -NoTypeInformation -Path .\$outfolder\computerInfo.csv
 	tree  C:\ >> .\$outfolder\tree.txt
+    get-childitem -recurse C:\Users\ | Where-Object { $_.LastWriteTime  -gt (Get-date).AddDays(-6)} | Export-Csv -NoTypeInformation -Path .\$outfolder\newFilesUsers.csv
 }
 
 Get-Baseline
